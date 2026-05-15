@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Simi's Heart 🌙</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#120a0e;--r:#c9607a;--rl:#e8829a;
+  --text:#f5d8e2;--dim:#7a4558;--muted:#3d1f2b;
+  --card:rgba(255,255,255,.05);--bd:rgba(201,96,122,.13);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 72% 12%,rgba(201,96,122,.14),transparent 55%),
+             radial-gradient(ellipse at 18% 88%,rgba(107,40,65,.22),transparent 55%);}
+
+/* SETUP */
+#setup{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;position:relative;z-index:1;}
+.s-inner{width:100%;max-width:340px;text-align:center;}
+.s-icon{font-size:3.4rem;display:block;margin-bottom:12px;animation:floatY 4s ease-in-out infinite;}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+.s-title{font-family:'Playfair Display',serif;font-size:2.3rem;color:var(--text);margin-bottom:5px;}
+.s-title em{color:var(--rl);font-style:italic;}
+.s-sub{font-size:.8rem;color:var(--dim);margin-bottom:32px;line-height:1.65;font-weight:300;}
+.s-card{background:rgba(255,255,255,.04);border-radius:18px;padding:20px 17px;border:1px solid var(--bd);text-align:left;margin-bottom:13px;}
+.s-clbl{font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:11px;}
+.s-field{margin-bottom:11px;}.s-field:last-child{margin-bottom:0;}
+.s-field label{font-size:.75rem;color:var(--text);font-weight:500;display:block;margin-bottom:4px;}
+.s-inp{width:100%;padding:11px 13px;border-radius:11px;border:1px solid rgba(201,96,122,.22);
+  background:rgba(255,255,255,.05);font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;}
+.s-inp:focus{border-color:var(--rl);}
+.s-inp::placeholder{color:var(--dim);}
+.s-hint{font-size:.68rem;color:var(--muted);margin-top:4px;line-height:1.5;}
+.s-btn{width:100%;padding:15px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--rl),var(--r));color:white;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+  cursor:pointer;box-shadow:0 8px 24px rgba(201,96,122,.34);transition:transform .2s;}
+.s-btn:active{transform:scale(.97);}
+
+/* SHELL */
+#app{display:none;flex-direction:column;height:100vh;height:-webkit-fill-available;position:relative;z-index:1;}
+
+/* NAV */
+.bnav{display:flex;background:rgba(18,10,14,.96);border-top:1px solid rgba(201,96,122,.15);
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom));flex-shrink:0;position:sticky;bottom:0;z-index:50;backdrop-filter:blur(10px);}
+.bnt{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.6rem;
+  color:var(--dim);cursor:pointer;transition:color .2s;background:none;border:none;font-family:'DM Sans',sans-serif;padding:4px 0;position:relative;}
+.bnt.on{color:var(--rl);}
+.bnt-icon{font-size:1.25rem;line-height:1;}
+
+/* PAGES */
+.page{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.page.on{display:block;}
+
+/* HEADERS */
+.pg-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:rgba(18,10,14,.96);z-index:10;
+  border-bottom:1px solid rgba(201,96,122,.1);backdrop-filter:blur(8px);}
+.pg-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--text);}
+.sync-row{display:flex;align-items:center;gap:4px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:#444;transition:background .3s;}
+.sdot.ok{background:#5ecc8b;}.sdot.busy{background:#f59e0b;animation:blk .8s infinite;}.sdot.err{background:#f87171;}
+@keyframes blk{0%,100%{opacity:1;}50%{opacity:.25;}}
+.stxt{font-size:.67rem;color:var(--dim);}
+.notif-badge{background:var(--r);color:white;font-size:.65rem;font-weight:600;padding:3px 10px;border-radius:100px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,96,122,.55);}50%{box-shadow:0 0 0 8px rgba(201,96,122,0);}}
+
+/* MOOD PAGE */
+#mood-page{padding-bottom:24px;}
+.hero{text-align:center;padding:20px 20px 14px;}
+.av{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#6b3a4a,var(--r));
+  display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px;animation:avatarGlow 3.5s ease-in-out infinite;}
+@keyframes avatarGlow{0%,100%{box-shadow:0 0 0 4px rgba(201,96,122,.16),0 8px 28px rgba(201,96,122,.28);}50%{box-shadow:0 0 0 8px rgba(201,96,122,.07),0 8px 42px rgba(201,96,122,.44);}}
+.hero h2{font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--text);}
+.hero p{font-size:.77rem;color:var(--dim);margin-top:2px;font-weight:300;}
+.sec{padding:0 16px;margin-bottom:15px;}
+.slbl{font-size:.64rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-left:2px;}
+.icard{background:var(--card);border-radius:16px;padding:14px 16px;border:1px solid var(--bd);}
+.mood-card{background:var(--card);border-radius:18px;padding:16px 16px 12px;border:1px solid var(--bd);display:flex;align-items:center;gap:14px;}
+.mood-big{font-size:2.9rem;flex-shrink:0;line-height:1;}
+.mood-right{flex:1;min-width:0;}
+.mood-right h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text);}
+.mood-right p{font-size:.72rem;color:var(--dim);margin-top:2px;}
+.mood-bar{height:5px;border-radius:3px;margin-top:9px;
+  background:linear-gradient(90deg,#7b8ff7,#b08af5 13%,#ff8c5a 26%,#ffc842 40%,#3dd68c 54%,#5cb8f5 68%,#f47ab0 82%,#ffae38);position:relative;}
+.mood-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:white;box-shadow:0 2px 7px rgba(0,0,0,.38);transition:left .9s cubic-bezier(.34,1.56,.64,1);}
+.tag{display:inline-block;padding:4px 10px;border-radius:100px;margin:3px;font-size:.73rem;line-height:1.4;}
+.rtag{background:rgba(201,96,122,.18);border:1px solid rgba(201,96,122,.28);color:var(--rl);}
+.ftag{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.22);color:#fbbf24;}
+.none-txt{font-size:.76rem;color:var(--muted);}
+.unsaid-q{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);line-height:1.7;font-style:italic;position:relative;padding-left:19px;}
+.unsaid-q::before{content:'"';position:absolute;left:0;top:-5px;font-size:2.1rem;color:var(--r);line-height:1;}
+.wants-txt{color:var(--text);font-size:.89rem;line-height:1.55;}
+.urg-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:9px;}
+.urg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3dd68c,#fbbf24,#f87171);transition:width 1s ease;}
+.urg-txt{font-size:.71rem;color:var(--muted);margin-top:4px;}
+.vibe-disp{padding:10px 13px;border-radius:12px;background:rgba(201,96,122,.07);border:1px solid rgba(201,96,122,.12);color:var(--rl);font-size:.85rem;}
+.ts-line{text-align:center;font-size:.67rem;color:var(--muted);padding:0 20px;margin-bottom:5px;}
+.refresh-btn{display:block;margin:5px auto;padding:8px 22px;border-radius:100px;
+  border:1px solid rgba(201,96,122,.15);background:transparent;color:var(--dim);
+  font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.refresh-btn:active{background:rgba(201,96,122,.08);color:var(--rl);}
+.live-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#3dd68c;margin-right:4px;vertical-align:middle;animation:lp 1.8s ease-in-out infinite;}
+@keyframes lp{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.65);}}
+.empty{text-align:center;padding:60px 28px;color:var(--muted);}
+.empty-icon{font-size:2.5rem;margin-bottom:11px;}
+.empty p{font-size:.82rem;line-height:1.75;color:var(--dim);}
+
+/* CHAT */
+#chat-page{display:none;flex-direction:column;height:100%;}
+#chat-page.on{display:flex;}
+.chat-head{padding:12px 18px;background:rgba(18,10,14,.96);border-bottom:1px solid rgba(201,96,122,.12);display:flex;align-items:center;gap:11px;flex-shrink:0;backdrop-filter:blur(10px);}
+.chat-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6b3a4a,var(--r));display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+.chat-name{font-family:'Playfair Display',serif;font-size:.93rem;color:var(--text);}
+.chat-status{font-size:.67rem;color:var(--dim);}
+.chat-online{display:inline-block;width:6px;height:6px;border-radius:50%;background:#5ecc8b;margin-right:4px;vertical-align:middle;}
+.messages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:13px 12px;display:flex;flex-direction:column;gap:7px;}
+.msg{max-width:78%;display:flex;flex-direction:column;gap:2px;}
+.msg.mine{align-self:flex-end;align-items:flex-end;}
+.msg.theirs{align-self:flex-start;align-items:flex-start;}
+.bubble{padding:9px 13px;border-radius:18px;font-size:.84rem;line-height:1.5;word-break:break-word;}
+.mine .bubble{background:linear-gradient(135deg,#6b3a4a,var(--r));color:white;border-bottom-right-radius:4px;}
+.theirs .bubble{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(201,96,122,.15);border-bottom-left-radius:4px;}
+.msg-time{font-size:.61rem;color:var(--muted);padding:0 3px;}
+.typing-ind{padding:7px 13px;font-size:.73rem;color:var(--dim);font-style:italic;display:none;}
+.typing-ind.show{display:block;}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;color:var(--dim);}
+.chat-empty-icon{font-size:2.8rem;margin-bottom:10px;}
+.chat-empty p{font-size:.8rem;line-height:1.7;}
+.emoji-tray{padding:9px 12px;background:rgba(18,10,14,.96);border-top:1px solid rgba(201,96,122,.1);display:none;flex-wrap:wrap;gap:7px;}
+.emoji-tray.show{display:flex;}
+.eq{font-size:1.3rem;cursor:pointer;padding:3px;transition:transform .15s;}
+.eq:active{transform:scale(1.3);}
+.chat-input-row{padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(18,10,14,.96);border-top:1px solid rgba(201,96,122,.12);display:flex;align-items:flex-end;gap:7px;flex-shrink:0;}
+.chat-input-wrap{flex:1;background:rgba(255,255,255,.06);border-radius:22px;border:1px solid rgba(201,96,122,.18);display:flex;align-items:center;padding:7px 12px;gap:7px;transition:border-color .2s;}
+.chat-input-wrap:focus-within{border-color:var(--rl);}
+#chatInput{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--text);outline:none;resize:none;max-height:120px;line-height:1.5;}
+#chatInput::placeholder{color:var(--dim);}
+.emoji-btn{background:none;border:none;font-size:1.15rem;cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
+.send-chat-btn{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--rl),var(--r));color:white;display:flex;align-items:center;justify-content:center;font-size:.93rem;cursor:pointer;box-shadow:0 4px 13px rgba(201,96,122,.35);transition:transform .15s;flex-shrink:0;}
+.send-chat-btn:active{transform:scale(.9);}
+
+/* GAMES PAGE */
+#games-page{padding-bottom:32px;}
+.game-hub-intro{text-align:center;padding:16px 20px 8px;}
+.game-hub-intro h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);}
+.game-hub-intro p{font-size:.77rem;color:var(--dim);margin-top:2px;}
+.game-hub{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.ghub-card{border-radius:20px;padding:17px 11px;text-align:center;cursor:pointer;
+  border:1px solid rgba(201,96,122,.15);background:rgba(255,255,255,.04);
+  transition:transform .18s;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.ghub-card:active{transform:scale(.95);}
+.ghub-card.full{grid-column:span 2;}
+.ghub-icon{font-size:1.9rem;line-height:1;}
+.ghub-name{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--text);}
+.ghub-desc{font-size:.65rem;color:var(--dim);line-height:1.35;}
+.ghub-tag{font-size:.59rem;padding:2px 8px;border-radius:100px;margin-top:2px;background:rgba(201,96,122,.15);color:var(--rl);font-weight:600;}
+.ghub-tag.hot{background:rgba(248,71,71,.12);color:#f87171;}
+
+/* GAME OVERLAY */
+.g-overlay{display:none;position:fixed;inset:0;z-index:100;overflow-y:auto;
+  background:linear-gradient(160deg,#1a0d12,#2a1520 50%,#1a1020);
+  flex-direction:column;-webkit-overflow-scrolling:touch;}
+.g-overlay.show{display:flex;}
+.g-top{padding:13px 16px;display:flex;align-items:center;gap:11px;
+  position:sticky;top:0;background:rgba(18,10,14,.97);z-index:5;
+  border-bottom:1px solid rgba(201,96,122,.12);backdrop-filter:blur(8px);flex-shrink:0;}
+.g-back{width:34px;height:34px;border-radius:50%;border:1px solid rgba(201,96,122,.22);
+  background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.93rem;cursor:pointer;color:var(--rl);flex-shrink:0;}
+.g-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--text);flex:1;}
+.g-body{flex:1;padding:16px 16px 40px;}
+
+/* Q cards */
+.q-card{background:rgba(255,255,255,.05);border-radius:20px;padding:22px 18px;
+  border:1px solid rgba(201,96,122,.15);text-align:center;margin-bottom:14px;min-height:130px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.q-badge{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 12px;border-radius:100px;}
+.q-badge.truth{background:rgba(96,165,250,.18);color:#93c5fd;}
+.q-badge.dare{background:rgba(251,146,60,.18);color:#fdba74;}
+.q-badge.dirty{background:rgba(232,130,154,.18);color:var(--rl);}
+.q-badge.quiz{background:rgba(167,139,250,.18);color:#c4b5fd;}
+.q-badge.never{background:rgba(52,211,153,.15);color:#6ee7b7;}
+.q-text{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text);line-height:1.5;}
+.q-sub{font-size:.72rem;color:var(--dim);}
+
+/* mode tabs */
+.mode-row{display:flex;gap:8px;margin-bottom:14px;}
+.mode-tab{flex:1;padding:9px;border-radius:11px;border:1px solid rgba(201,96,122,.2);
+  background:rgba(255,255,255,.04);font-size:.75rem;color:var(--text);cursor:pointer;text-align:center;transition:all .16s;font-family:'DM Sans',sans-serif;}
+.mode-tab.on{background:var(--r);color:white;border-color:var(--r);}
+
+/* action btns */
+.action-row{display:flex;gap:8px;margin-bottom:14px;}
+.act-btn{flex:1;padding:14px 10px;border-radius:14px;border:none;color:white;
+  font-family:'Playfair Display',serif;font-size:.93rem;font-weight:700;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.2);transition:transform .15s;}
+.act-btn:active{transform:scale(.96);}
+.act-truth{background:linear-gradient(135deg,#60a5fa,#2563eb);}
+.act-dare{background:linear-gradient(135deg,#fb923c,#ea580c);}
+.act-next{background:linear-gradient(135deg,var(--rl),var(--r));}
+.act-spin{background:linear-gradient(135deg,#a78bfa,#7c3aed);}
+
+/* custom sections */
+.custom-sec{margin-top:6px;}
+.custom-sec-lbl{font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.custom-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;max-height:150px;overflow-y:auto;}
+.citem{display:flex;align-items:center;gap:7px;padding:7px 11px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(201,96,122,.1);}
+.citem-text{flex:1;font-size:.75rem;color:var(--text);}
+.citem-del{background:none;border:none;color:#f87171;font-size:.95rem;cursor:pointer;}
+.crow{display:flex;gap:7px;}
+.cinp{flex:1;padding:8px 12px;border-radius:100px;border:1px solid rgba(201,96,122,.2);background:rgba(255,255,255,.05);
+  font-family:'DM Sans',sans-serif;font-size:.72rem;color:var(--text);outline:none;transition:border-color .2s;}
+.cinp:focus{border-color:var(--rl);}
+.cinp::placeholder{color:var(--dim);}
+.cadd{padding:8px 13px;border-radius:100px;border:none;background:var(--r);color:white;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.cadd:active{opacity:.8;}
+.ctabs{display:flex;gap:6px;margin-bottom:8px;}
+.ctab{padding:5px 11px;border-radius:100px;border:1px solid rgba(201,96,122,.2);background:rgba(255,255,255,.04);font-size:.68rem;color:var(--text);cursor:pointer;}
+.ctab.on{background:var(--r);color:white;border-color:var(--r);}
+
+/* quiz */
+.quiz-score-bar{background:rgba(255,255,255,.05);border-radius:13px;padding:12px 16px;border:1px solid var(--bd);display:flex;justify-content:space-around;align-items:center;margin-bottom:14px;}
+.qs-num{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--rl);display:block;text-align:center;}
+.qs-lbl{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;display:block;text-align:center;}
+.quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.quiz-opt{padding:12px 8px;border-radius:12px;text-align:center;border:1px solid rgba(201,96,122,.18);
+  background:rgba(255,255,255,.05);font-size:.79rem;color:var(--text);cursor:pointer;transition:all .16s;line-height:1.35;}
+.quiz-opt:active{transform:scale(.96);}
+.quiz-opt.correct{background:rgba(52,211,153,.2);border-color:#34d399;color:#6ee7b7;}
+.quiz-opt.wrong{background:rgba(248,113,113,.2);border-color:#f87171;color:#fca5a5;}
+
+/* nhai */
+.nhai-scores{background:rgba(255,255,255,.05);border-radius:13px;padding:12px 16px;border:1px solid var(--bd);display:flex;justify-content:space-around;margin-bottom:14px;}
+.ns-name{font-size:.71rem;color:var(--dim);text-align:center;}
+.ns-num{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--rl);text-align:center;}
+.nhai-yesno{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.nhai-btn{padding:15px;border-radius:14px;border:none;font-size:1.3rem;cursor:pointer;transition:transform .15s;}
+.nhai-btn:active{transform:scale(.93);}
+.nhai-yes{background:rgba(52,211,153,.2);}
+.nhai-no{background:rgba(248,113,113,.18);}
+
+/* spin */
+.wheel-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:14px;}
+.wheel-outer{position:relative;width:240px;height:240px;margin:0 auto 10px;}
+#wheelCanvas{border-radius:50%;box-shadow:0 8px 28px rgba(201,96,122,.22);}
+.wheel-ptr{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:1.6rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));}
+.wheel-result{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);text-align:center;min-height:28px;font-style:italic;}
+.wheel-items{margin-top:12px;}
+.wi-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.wi-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.wi-name{flex:1;font-size:.77rem;color:var(--text);}
+.wi-del{background:none;border:none;color:#f87171;font-size:.88rem;cursor:pointer;}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--text);color:var(--ink);padding:10px 18px;border-radius:100px;
+  font-size:.77rem;z-index:400;transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;pointer-events:none;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ══ PIN SCREENS ══ */
+#pin-screen,#create-pin-screen{
+  min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 70% 20%,rgba(201,96,122,.18),transparent 60%),
+             radial-gradient(ellipse at 20% 80%,rgba(107,40,65,.25),transparent 60%),var(--ink);
+  padding:32px 20px;position:relative;z-index:10;
+}
+#pin-screen.show,#create-pin-screen.show{display:flex;}
+.pin-inner{text-align:center;width:280px;position:relative;z-index:1;}
+.pin-avatar{font-size:3.2rem;display:block;margin-bottom:12px;animation:floatY 4s ease-in-out infinite;}
+.pin-title{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--text);margin-bottom:4px;}
+.pin-sub{font-size:.78rem;color:var(--dim);margin-bottom:26px;line-height:1.5;}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(201,96,122,.3);background:transparent;transition:all .18s;}
+.pin-dot.filled{background:var(--r);border-color:var(--r);transform:scale(1.1);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+.pin-key{aspect-ratio:1;border-radius:50%;border:1px solid rgba(201,96,122,.2);background:rgba(255,255,255,.05);
+  font-size:1.2rem;font-weight:400;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  font-family:'DM Sans',sans-serif;backdrop-filter:blur(6px);}
+.pin-key:active{background:rgba(201,96,122,.2);border-color:var(--r);transform:scale(.93);}
+.pin-key.del{font-size:.9rem;color:var(--dim);}
+.pin-err{color:var(--rl);font-size:.74rem;min-height:18px;}
+.pin-hint{font-size:.68rem;color:var(--muted);margin-top:12px;}
+.pin-change{font-size:.7rem;color:var(--dim);background:none;border:none;cursor:pointer;
+  text-decoration:underline;text-underline-offset:2px;margin-top:10px;display:block;margin:10px auto 0;}
+.create-pin-step{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-9px);}40%{transform:translateX(9px);}60%{transform:translateX(-7px);}80%{transform:translateX(7px);}}
+.shake{animation:shake .4s ease;}
+
+/* ══ MOVIES PAGE ══ */
+#movies-page{padding-bottom:32px;}
+.movie-tabs{display:flex;gap:0;padding:10px 16px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.movie-tabs::-webkit-scrollbar{display:none;}
+.mtab{padding:7px 14px;border-radius:100px;border:1px solid rgba(201,96,122,.18);background:rgba(255,255,255,.04);
+  font-size:.7rem;color:var(--text);cursor:pointer;white-space:nowrap;margin-right:7px;
+  transition:all .16s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.mtab.on{background:var(--r);color:white;border-color:var(--r);}
+
+/* TINDER CARD */
+.swipe-area{position:relative;height:360px;margin:14px 16px 10px;user-select:none;}
+.movie-card{position:absolute;inset:0;border-radius:24px;overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.35);cursor:grab;
+  background:rgba(255,255,255,.06);border:1px solid rgba(201,96,122,.15);
+  transition:transform .08s;touch-action:none;}
+.movie-card:active{cursor:grabbing;}
+.movie-card.gone{display:none;}
+.movie-card.fly-right{animation:flyRight .38s ease forwards;}
+.movie-card.fly-left{animation:flyLeft .38s ease forwards;}
+@keyframes flyRight{to{transform:translateX(130%) rotate(18deg);opacity:0;}}
+@keyframes flyLeft{to{transform:translateX(-130%) rotate(-18deg);opacity:0;}}
+.mc-poster{width:100%;height:220px;background:linear-gradient(135deg,rgba(201,96,122,.25),rgba(107,40,65,.3));
+  display:flex;align-items:center;justify-content:center;font-size:4rem;}
+.mc-info{padding:14px 16px 10px;}
+.mc-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text);margin-bottom:4px;}
+.mc-meta{font-size:.72rem;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+.mc-badge{padding:2px 9px;border-radius:100px;font-size:.62rem;font-weight:600;}
+.mc-badge.lang-en{background:rgba(96,165,250,.18);color:#93c5fd;}
+.mc-badge.lang-hi{background:rgba(251,191,36,.18);color:#fcd34d;}
+.mc-badge.lang-bn{background:rgba(52,211,153,.15);color:#6ee7b7;}
+.mc-badge.lang-ko{background:rgba(167,139,250,.18);color:#c4b5fd;}
+.mc-badge.lang-custom{background:rgba(201,96,122,.18);color:var(--rl);}
+.mc-genre{font-size:.7rem;color:var(--dim);}
+
+.swipe-hint{position:absolute;top:14px;padding:5px 14px;border-radius:100px;
+  font-size:.8rem;font-weight:700;opacity:0;transition:opacity .15s;pointer-events:none;z-index:5;}
+.hint-yes{left:14px;background:rgba(52,211,153,.25);color:#6ee7b7;border:2px solid rgba(52,211,153,.5);}
+.hint-no{right:14px;background:rgba(248,113,113,.2);color:#fca5a5;border:2px solid rgba(248,113,113,.4);}
+
+.swipe-btns{display:flex;justify-content:center;gap:20px;padding:6px 16px;}
+.swipe-btn{width:60px;height:60px;border-radius:50%;border:2px solid;
+  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+  cursor:pointer;transition:transform .15s;background:rgba(255,255,255,.04);}
+.swipe-btn:active{transform:scale(.9);}
+.swipe-btn.no{border-color:rgba(248,113,113,.5);color:#f87171;}
+.swipe-btn.yes{border-color:rgba(52,211,153,.5);color:#34d399;}
+
+.match-flash{display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(201,96,122,.12);backdrop-filter:blur(12px);
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+.match-flash.show{display:flex;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+.match-flash-card{background:rgba(30,16,22,.95);border-radius:28px;padding:36px 28px;max-width:300px;width:100%;border:1px solid rgba(201,96,122,.3);}
+.mf-emoji{font-size:3rem;margin-bottom:12px;}
+.mf-title{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--text);margin-bottom:6px;}
+.mf-movie{font-size:1rem;color:var(--rl);font-weight:600;margin-bottom:6px;}
+.mf-sub{font-size:.79rem;color:var(--dim);line-height:1.55;margin-bottom:20px;}
+.mf-close{padding:11px 26px;border-radius:100px;background:var(--r);color:white;border:none;cursor:pointer;font-size:.86rem;}
+
+.matches-section{padding:0 16px;margin-top:10px;}
+.match-item{background:var(--card);border-radius:13px;padding:12px 14px;border:1px solid var(--bd);display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.mi-poster{width:36px;height:36px;border-radius:8px;background:rgba(201,96,122,.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.mi-title{font-size:.84rem;color:var(--text);font-family:'Playfair Display',serif;}
+.mi-meta{font-size:.66rem;color:var(--dim);}
+
+.movie-add-section{margin:10px 16px 0;padding:14px;background:var(--card);border-radius:18px;border:1px solid var(--bd);}
+.movie-add-row{display:flex;flex-direction:column;gap:7px;}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="s-inner">
+    <span class="s-icon">🌙</span>
+    <h1 class="s-title">Hey <em>you</em></h1>
+    <p class="s-sub">See Simi's heart whenever she shares. Chat privately. Play games together.</p>
+    <div class="s-card">
+      <div class="s-clbl">one-time setup</div>
+      <div class="s-field">
+        <label>Bin ID</label>
+        <input class="s-inp" id="inp-bin" placeholder="6849f2a3e41b4d34..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+        <div class="s-hint">Go to <strong>jsonbin.io</strong> → Create Bin → put <code>{"init":true}</code> → copy the ID.</div>
+      </div>
+      <div class="s-field">
+        <label>Master Key</label>
+        <input class="s-inp" id="inp-key" placeholder="$2a$10$..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+        <div class="s-hint">From JSONBin dashboard → API Keys. Share the same Bin ID + Key with Simi.</div>
+      </div>
+      <div class="s-field">
+        <label>TMDB API Key <span style="font-size:.65rem;color:var(--dim);">(for movies)</span></label>
+        <input class="s-inp" id="inp-tmdb" placeholder="e.g. a1b2c3d4e5..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+        <div class="s-hint">Free at <strong>themoviedb.org</strong> → Settings → API. Same key as Simi's app.</div>
+      </div>
+    </div>
+    <button class="s-btn" onclick="setupDone()">Connect ✦</button>
+  </div>
+</div>
+
+<!-- CREATE PIN SCREEN -->
+<div id="create-pin-screen">
+  <div class="pin-inner">
+    <span class="pin-avatar">🔒</span>
+    <div class="create-pin-step" id="create-pin-step">Step 1 of 2</div>
+    <h2 class="pin-title" id="create-pin-title">Create your PIN</h2>
+    <p class="pin-sub" id="create-pin-sub">Choose a 4-digit PIN. Only you will know it.</p>
+    <div class="pin-dots" id="create-pin-dots">
+      <div class="pin-dot" id="cd0"></div><div class="pin-dot" id="cd1"></div>
+      <div class="pin-dot" id="cd2"></div><div class="pin-dot" id="cd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="createPinKey('1')">1</button>
+      <button class="pin-key" onclick="createPinKey('2')">2</button>
+      <button class="pin-key" onclick="createPinKey('3')">3</button>
+      <button class="pin-key" onclick="createPinKey('4')">4</button>
+      <button class="pin-key" onclick="createPinKey('5')">5</button>
+      <button class="pin-key" onclick="createPinKey('6')">6</button>
+      <button class="pin-key" onclick="createPinKey('7')">7</button>
+      <button class="pin-key" onclick="createPinKey('8')">8</button>
+      <button class="pin-key" onclick="createPinKey('9')">9</button>
+      <button class="pin-key" style="visibility:hidden"></button>
+      <button class="pin-key" onclick="createPinKey('0')">0</button>
+      <button class="pin-key del" onclick="createPinDel()">⌫</button>
+    </div>
+    <div class="pin-err" id="create-pin-err"></div>
+  </div>
+</div>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-inner">
+    <span class="pin-avatar">🌙</span>
+    <h2 class="pin-title">Hey you 👋</h2>
+    <p class="pin-sub">Enter your PIN to open your space</p>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" style="visibility:hidden"></button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+    <button class="pin-change" onclick="forgotPin()">Forgot PIN? Reset app</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- MOOD PAGE -->
+  <div class="page on" id="mood-page">
+    <div class="pg-head">
+      <span class="pg-title"><span class="live-dot"></span>Simi right now</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="notif-badge" id="nbadge" style="display:none;">✦ new</span>
+        <div class="sync-row"><div class="sdot ok" id="sdot"></div><span class="stxt" id="stxt">live</span></div>
+        <button onclick="lockApp()" style="font-size:.68rem;color:var(--dim);background:none;border:1px solid rgba(201,96,122,.18);padding:4px 10px;border-radius:100px;cursor:pointer;">🔒</button>
+      </div>
+    </div>
+    <div id="moodContent">
+      <div class="empty"><div class="empty-icon">🌙</div><p>She hasn't shared anything yet.<br>It'll appear right here when she does.</p></div>
+    </div>
+    <button class="refresh-btn" onclick="loadCloud()">↻ refresh</button>
+  </div>
+
+  <!-- CHAT PAGE -->
+  <div class="page" id="chat-page">
+    <div class="chat-head">
+      <div class="chat-av">🌸</div>
+      <div><div class="chat-name">Simi 🌸</div><div class="chat-status"><span class="chat-online"></span>private chat</div></div>
+    </div>
+    <div class="messages" id="messages">
+      <div class="chat-empty"><div class="chat-empty-icon">💌</div><p>Your private messages will appear here.</p></div>
+    </div>
+    <div class="typing-ind" id="typingInd">Simi is typing...</div>
+    <div class="emoji-tray" id="emojiTray">
+      <span class="eq" onclick="ins('❤️')">❤️</span><span class="eq" onclick="ins('🥰')">🥰</span>
+      <span class="eq" onclick="ins('😘')">😘</span><span class="eq" onclick="ins('💕')">💕</span>
+      <span class="eq" onclick="ins('😂')">😂</span><span class="eq" onclick="ins('🥺')">🥺</span>
+      <span class="eq" onclick="ins('😭')">😭</span><span class="eq" onclick="ins('🌙')">🌙</span>
+      <span class="eq" onclick="ins('✨')">✨</span><span class="eq" onclick="ins('🌸')">🌸</span>
+      <span class="eq" onclick="ins('🙏')">🙏</span><span class="eq" onclick="ins('😍')">😍</span>
+      <span class="eq" onclick="ins('🤗')">🤗</span><span class="eq" onclick="ins('💋')">💋</span>
+      <span class="eq" onclick="ins('💙')">💙</span><span class="eq" onclick="ins('😤')">😤</span>
+    </div>
+    <div class="chat-input-row">
+      <div class="chat-input-wrap">
+        <button class="emoji-btn" onclick="toggleEmoji()">😊</button>
+        <textarea id="chatInput" rows="1" placeholder="message Simi..." oninput="autoResize(this);onTyping()"></textarea>
+      </div>
+      <button class="send-chat-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+
+  <!-- GAMES PAGE -->
+  <div class="page" id="games-page">
+    <div class="pg-head">
+      <span class="pg-title">Games 🎮</span>
+      <span style="font-size:.7rem;color:var(--dim);">just us two 💕</span>
+    </div>
+    <!-- SYNCED CARD FROM SIMI -->
+    <div id="sync-game-box" style="display:none;padding:12px 16px 0;"></div>
+    <div class="game-hub-intro"><h2>Play together</h2><p>Pick a game — Simi sees your card live 🔴</p></div>
+    <div class="game-hub">
+      <div class="ghub-card" onclick="openGame('tod')">
+        <div class="ghub-icon">🎭</div><div class="ghub-name">Truth or Dare</div>
+        <div class="ghub-desc">Fun &amp; spicy versions</div><div class="ghub-tag">customisable</div>
+      </div>
+      <div class="ghub-card" onclick="openGame('dirty')">
+        <div class="ghub-icon">🔥</div><div class="ghub-name">Dirty Questions</div>
+        <div class="ghub-desc">Mild to wild 😏</div><div class="ghub-tag hot">18+</div>
+      </div>
+      <div class="ghub-card" onclick="openGame('quiz')">
+        <div class="ghub-icon">💭</div><div class="ghub-name">Couple Quiz</div>
+        <div class="ghub-desc">How well do you know each other?</div><div class="ghub-tag">customisable</div>
+      </div>
+      <div class="ghub-card" onclick="openGame('nhai')">
+        <div class="ghub-icon">🙅</div><div class="ghub-name">Never Have I Ever</div>
+        <div class="ghub-desc">Find out secrets</div><div class="ghub-tag">customisable</div>
+      </div>
+      <div class="ghub-card full" onclick="openGame('spin')">
+        <div class="ghub-icon">🎡</div><div class="ghub-name">Spin the Wheel</div>
+        <div class="ghub-desc">Random couple activities — add your own</div><div class="ghub-tag">fully customisable</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ GAME OVERLAYS ═══ -->
+  <!-- TRUTH OR DARE -->
+  <div class="g-overlay" id="g-tod">
+    <div class="g-top"><button class="g-back" onclick="closeGame('tod')">←</button><span class="g-title">🎭 Truth or Dare</span></div>
+    <div class="g-body">
+      <div class="mode-row">
+        <button class="mode-tab on" id="tod-fun" onclick="todMode('fun')">🌸 Fun</button>
+        <button class="mode-tab" id="tod-spicy" onclick="todMode('spicy')">🌶️ Spicy</button>
+      </div>
+      <div class="q-card" id="tod-card">
+        <span class="q-badge truth" id="tod-badge">TRUTH</span>
+        <div class="q-text" id="tod-text">Pick Truth or Dare to start!</div>
+      </div>
+      <div class="action-row">
+        <button class="act-btn act-truth" onclick="drawTod('truth')">💬 Truth</button>
+        <button class="act-btn act-dare" onclick="drawTod('dare')">🎯 Dare</button>
+      </div>
+      <div class="custom-sec">
+        <div class="custom-sec-lbl">your custom truths &amp; dares</div>
+        <div class="ctabs">
+          <button class="ctab on" id="ctab-truth" onclick="switchCtab('truth')">Truths</button>
+          <button class="ctab" id="ctab-dare" onclick="switchCtab('dare')">Dares</button>
+        </div>
+        <div class="custom-list" id="tod-list"></div>
+        <div class="crow"><input class="cinp" id="tod-cinp" placeholder="add a custom truth or dare..." maxlength="120"/><button class="cadd" onclick="addCustomTod()">+ add</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRTY QUESTIONS -->
+  <div class="g-overlay" id="g-dirty">
+    <div class="g-top"><button class="g-back" onclick="closeGame('dirty')">←</button><span class="g-title">🔥 Dirty Questions</span></div>
+    <div class="g-body">
+      <div class="mode-row">
+        <button class="mode-tab on" id="dirty-mild" onclick="dirtyMode('mild')">😏 Mild</button>
+        <button class="mode-tab" id="dirty-wild" onclick="dirtyMode('wild')">🔥 Wild</button>
+      </div>
+      <div class="q-card" id="dirty-card"><span class="q-badge dirty">DIRTY</span><div class="q-text" id="dirty-text">Tap below for a question!</div></div>
+      <div class="action-row"><button class="act-btn act-next" onclick="drawDirty()">Next question 🔥</button></div>
+      <div class="custom-sec">
+        <div class="custom-sec-lbl">your custom dirty questions</div>
+        <div class="custom-list" id="dirty-list"></div>
+        <div class="crow"><input class="cinp" id="dirty-cinp" placeholder="add your own..." maxlength="120"/><button class="cadd" onclick="addCustom('dirty')">+ add</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COUPLE QUIZ -->
+  <div class="g-overlay" id="g-quiz">
+    <div class="g-top"><button class="g-back" onclick="closeGame('quiz')">←</button><span class="g-title">💭 Couple Quiz</span></div>
+    <div class="g-body">
+      <div class="quiz-score-bar">
+        <div><span class="qs-num" id="quiz-correct">0</span><span class="qs-lbl">correct</span></div>
+        <div><span class="qs-num" id="quiz-total">0</span><span class="qs-lbl">played</span></div>
+      </div>
+      <div class="q-card" id="quiz-card">
+        <span class="q-badge quiz" id="quiz-badge">ABOUT SIMI</span>
+        <div class="q-text" id="quiz-text">Tap below to get your first question!</div>
+        <div class="q-sub">Answer in chat — she'll confirm 💕</div>
+      </div>
+      <div class="quiz-opts" id="quiz-opts"></div>
+      <div class="action-row"><button class="act-btn act-next" onclick="drawQuiz()">New question 💭</button></div>
+      <div class="custom-sec">
+        <div class="custom-sec-lbl">add your own questions (with answer)</div>
+        <div class="custom-list" id="quiz-list"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <input class="cinp" style="border-radius:12px;padding:9px 13px;" id="quiz-q-cinp" placeholder="question about Simi or you..." maxlength="120"/>
+          <input class="cinp" style="border-radius:12px;padding:9px 13px;" id="quiz-a-cinp" placeholder="correct answer..." maxlength="60"/>
+          <button class="cadd" style="border-radius:12px;padding:9px;" onclick="addCustomQuiz()">+ add question</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEVER HAVE I EVER -->
+  <div class="g-overlay" id="g-nhai">
+    <div class="g-top"><button class="g-back" onclick="closeGame('nhai')">←</button><span class="g-title">🙅 Never Have I Ever</span></div>
+    <div class="g-body">
+      <div class="nhai-scores">
+        <div><div class="ns-name">Me 🌙</div><div class="ns-num" id="nhai-me">0</div></div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--dim);align-self:center;">vs</div>
+        <div><div class="ns-name">Simi 🌸</div><div class="ns-num" id="nhai-him">0</div></div>
+      </div>
+      <div class="q-card" id="nhai-card"><span class="q-badge never">NEVER HAVE I EVER</span><div class="q-text" id="nhai-text">Tap below to start!</div></div>
+      <div class="nhai-yesno">
+        <button class="nhai-btn nhai-yes" onclick="nhaiVote(true)">✋ I have!</button>
+        <button class="nhai-btn nhai-no" onclick="nhaiVote(false)">🙅 Never!</button>
+      </div>
+      <div class="action-row"><button class="act-btn act-next" onclick="drawNhai()">Next one →</button></div>
+      <div class="custom-sec">
+        <div class="custom-sec-lbl">add your own</div>
+        <div class="custom-list" id="nhai-list"></div>
+        <div class="crow"><input class="cinp" id="nhai-cinp" placeholder="Never have I ever..." maxlength="120"/><button class="cadd" onclick="addCustom('nhai')">+ add</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPIN THE WHEEL -->
+  <div class="g-overlay" id="g-spin">
+    <div class="g-top"><button class="g-back" onclick="closeGame('spin')">←</button><span class="g-title">🎡 Spin the Wheel</span></div>
+    <div class="g-body">
+      <div class="wheel-wrap">
+        <div class="wheel-outer">
+          <div class="wheel-ptr">▼</div>
+          <canvas id="wheelCanvas" width="240" height="240"></canvas>
+        </div>
+        <div class="wheel-result" id="spinResult">Spin to pick something fun!</div>
+      </div>
+      <div class="action-row"><button class="act-btn act-spin" id="spinBtn" onclick="doSpin()">Spin! 🎡</button></div>
+      <div class="custom-sec">
+        <div class="custom-sec-lbl">wheel activities</div>
+        <div class="wheel-items" id="wheelItemsList"></div>
+        <div class="crow" style="margin-top:8px;"><input class="cinp" id="spin-cinp" placeholder="add an activity..." maxlength="60"/><button class="cadd" onclick="addWheelItem()">+ add</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOVIES PAGE -->
+  <div class="page" id="movies-page">
+    <div class="pg-head">
+      <span class="pg-title">🎬 Watch Together</span>
+      <span style="font-size:.7rem;color:var(--dim);">swipe to pick 🍿</span>
+    </div>
+    <div class="movie-tabs">
+      <button class="mtab on" onclick="setMovieCat('all',this)">All ✨</button>
+      <button class="mtab" onclick="setMovieCat('bn',this)">🇧🇩 Bangla</button>
+      <button class="mtab" onclick="setMovieCat('hi',this)">🇮🇳 Hindi</button>
+      <button class="mtab" onclick="setMovieCat('en',this)">🌍 English</button>
+      <button class="mtab" onclick="setMovieCat('ko',this)">🇰🇷 Korean</button>
+      <button class="mtab" onclick="setMovieCat('custom',this)">⭐ Custom</button>
+      <button class="mtab" onclick="setMovieCat('matches',this)">💚 Matches</button>
+    </div>
+    <div id="swipe-section">
+      <div class="swipe-area" id="swipeArea">
+        <div class="swipe-hint hint-yes" id="hintYes">❤️ YES</div>
+        <div class="swipe-hint hint-no" id="hintNo">✕ NOPE</div>
+        <div id="movieCardSlot"></div>
+      </div>
+      <div class="swipe-btns">
+        <button class="swipe-btn no" onclick="swipeCard(false)">✕</button>
+        <button class="swipe-btn" style="border-color:rgba(251,191,36,.4);color:#fbbf24;" onclick="undoSwipe()">↩</button>
+        <button class="swipe-btn yes" onclick="swipeCard(true)">❤️</button>
+      </div>
+      <div id="swipeDone" style="display:none;text-align:center;padding:30px 24px;">
+        <div style="font-size:2.5rem;margin-bottom:10px;">🎉</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text);margin-bottom:6px;">All swiped!</div>
+        <div style="font-size:.79rem;color:var(--dim);margin-bottom:16px;">Check Matches or reset to go again.</div>
+        <button class="cadd" style="border-radius:12px;padding:10px 20px;" onclick="resetSwipes()">Reset & start over</button>
+      </div>
+    </div>
+    <div id="matches-section" style="display:none;padding:0 16px 16px;">
+      <div class="slbl" style="margin:14px 0 9px;">💚 movies you both liked</div>
+      <div id="matchesList"><div style="font-size:.82rem;color:var(--dim);padding:8px 0;">No matches yet — keep swiping!</div></div>
+    </div>
+    <div class="movie-add-section" id="movie-add-section" style="display:none;">
+      <div class="slbl" style="margin-bottom:10px;">add a custom movie or series</div>
+      <div class="movie-add-row">
+        <input class="cinp" style="border-radius:12px;padding:10px 13px;" id="cm-title" placeholder="Title (e.g. Hawa, Dil Dhadakne Do...)"/>
+        <div style="display:flex;gap:7px;">
+          <select class="cinp" id="cm-lang" style="border-radius:12px;padding:10px 8px;flex:1;background:rgba(255,255,255,.06);color:var(--text);">
+            <option value="bn">🇧🇩 Bangla</option>
+            <option value="hi">🇮🇳 Hindi</option>
+            <option value="en">🌍 English</option>
+            <option value="ko">🇰🇷 Korean</option>
+          </select>
+          <select class="cinp" id="cm-type" style="border-radius:12px;padding:10px 8px;flex:1;background:rgba(255,255,255,.06);color:var(--text);">
+            <option value="Movie">Movie</option>
+            <option value="Series">Series</option>
+          </select>
+        </div>
+        <input class="cinp" style="border-radius:12px;padding:10px 13px;" id="cm-genre" placeholder="Genre (Romance, Thriller...)"/>
+        <button class="cadd" style="border-radius:12px;padding:10px;" onclick="addCustomMovie()">+ Add to list</button>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="slbl" style="margin-bottom:7px;">your custom list</div>
+        <div id="custom-movie-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPECIAL PAGE -->
+  <div class="page" id="special-page">
+    <div class="pg-head">
+      <span class="pg-title">💍 Our Special Days</span>
+      <span style="font-size:.7rem;color:var(--dim);">& location</span>
+    </div>
+    <div style="padding:12px 16px 32px;">
+      <div class="slbl" style="margin-bottom:10px;">anniversary counters</div>
+      <div id="countersList"></div>
+      <div class="icard" style="margin-bottom:18px;">
+        <div class="slbl" style="margin-bottom:10px;">add a special occasion</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <input class="cinp" style="border-radius:12px;padding:10px 13px;color:var(--text);" id="cnt-name" placeholder="e.g. First Date, Engagement..." maxlength="40"/>
+          <input class="cinp" type="date" id="cnt-date" style="border-radius:12px;padding:10px 13px;color:var(--text);background:rgba(255,255,255,.06);"/>
+          <div style="display:flex;gap:12px;">
+            <label style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--text);cursor:pointer;">
+              <input type="checkbox" id="cnt-monthly" style="accent-color:var(--r);"/> Monthly reminder
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--text);cursor:pointer;">
+              <input type="checkbox" id="cnt-yearly" checked style="accent-color:var(--r);"/> Yearly reminder
+            </label>
+          </div>
+          <button class="cadd" style="border-radius:12px;padding:10px;" onclick="addCounter()">+ Add occasion</button>
+        </div>
+      </div>
+      <div class="slbl" style="margin-bottom:10px;">my location</div>
+      <div class="icard" style="margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:.93rem;color:var(--text);">Share my location</div>
+            <div style="font-size:.71rem;color:var(--dim);margin-top:2px;" id="loc-status">Not sharing</div>
+          </div>
+          <button class="cadd" id="loc-btn" style="border-radius:100px;" onclick="toggleLocation()">Share 📍</button>
+        </div>
+        <div id="loc-preview" style="display:none;font-size:.75rem;color:var(--dim);background:rgba(255,255,255,.06);border-radius:10px;padding:9px 11px;line-height:1.6;"></div>
+      </div>
+      <div class="slbl" style="margin-bottom:10px;">Simi's location</div>
+      <div class="icard">
+        <div style="font-size:.8rem;color:var(--text);margin-bottom:8px;" id="simi-loc-text">Waiting for her location...</div>
+        <div id="simi-loc-map" style="display:none;">
+          <a id="simi-loc-link" href="#" target="_blank" style="font-size:.75rem;color:var(--rl);text-decoration:none;">📍 Open in Maps →</a>
+        </div>
+        <div style="font-size:.67rem;color:var(--muted);margin-top:6px;" id="simi-loc-time"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="bnt on" id="nav-mood" onclick="goPage('mood')"><span class="bnt-icon">🌸</span>her mood</button>
+    <button class="bnt" id="nav-chat" onclick="goPage('chat')"><span class="bnt-icon">💬</span>chat</button>
+    <button class="bnt" id="nav-games" onclick="goPage('games')"><span class="bnt-icon">🎮</span>games</button>
+    <button class="bnt" id="nav-movies" onclick="goPage('movies')"><span class="bnt-icon">🎬</span>movies</button>
+    <button class="bnt" id="nav-special" onclick="goPage('special')"><span class="bnt-icon">💍</span>us</button>
+  </nav>
+</div>
+
+<!-- MATCH FLASH -->
+<div class="match-flash" id="matchFlash">
+  <div class="match-flash-card">
+    <div class="mf-emoji">🎉</div>
+    <div class="mf-title">It's a Match!</div>
+    <div class="mf-movie" id="mfMovie"></div>
+    <div class="mf-sub">You both swiped right on this one!<br>Time to watch it together 🍿</div>
+    <button class="mf-close" onclick="closeMatchFlash()">Let's go! 🎬</button>
+  </div>
+</div>
+
+<div id="toast">✓</div>
+
+<script>
+const SETUP_KEY='his_s2';
+const WHO='him';
+const URGS=[[0,20,'🌿 no rush'],[21,50,'💛 would be nice soon'],[51,75,'🔶 kinda important'],[76,90,'🔴 really needs this'],[91,100,'🚨 urgent']];
+let BIN='',KEY='',TMDB='',pollT=null,typingT=null,lastMsgCount=0,lastMoodTS='';
+
+function setupDone(){
+  const b=document.getElementById('inp-bin').value.trim();
+  const k=document.getElementById('inp-key').value.trim();
+  const tm=document.getElementById('inp-tmdb').value.trim();
+  if(!b||!k){toast('Fill in Bin ID and Master Key');return;}
+  BIN=b;KEY=k;TMDB=tm;
+  localStorage.setItem(SETUP_KEY,JSON.stringify({b,k,tm}));
+  showPinOrCreate();
+}
+function loadSetup(){try{const s=JSON.parse(localStorage.getItem(SETUP_KEY)||'');if(s.b&&s.k){BIN=s.b;KEY=s.k;TMDB=s.tm||'';showPinOrCreate();}}catch(e){}}
+
+// ── PIN FLOW ──
+const PIN_KEY='his_pin_v1';
+let pinEntry='',createStep=1,createFirst='';
+
+function showPinOrCreate(){
+  const saved=localStorage.getItem(PIN_KEY);
+  if(!saved){document.getElementById('create-pin-screen').classList.add('show');}
+  else{document.getElementById('pin-screen').classList.add('show');}
+}
+
+// CREATE PIN
+function createPinKey(k){
+  if(pinEntry.length>=4)return;
+  pinEntry+=k;updateCreateDots();
+  if(pinEntry.length===4)setTimeout(createPinNext,120);
+}
+function createPinDel(){pinEntry=pinEntry.slice(0,-1);updateCreateDots();document.getElementById('create-pin-err').textContent='';}
+function updateCreateDots(){for(let i=0;i<4;i++)document.getElementById('cd'+i).classList.toggle('filled',i<pinEntry.length);}
+function createPinNext(){
+  if(createStep===1){
+    createFirst=pinEntry;pinEntry='';updateCreateDots();
+    document.getElementById('create-pin-step').textContent='Step 2 of 2';
+    document.getElementById('create-pin-title').textContent='Confirm your PIN';
+    document.getElementById('create-pin-sub').textContent='Enter the same PIN again to confirm.';
+    createStep=2;
+  } else {
+    if(pinEntry===createFirst){
+      localStorage.setItem(PIN_KEY,pinEntry);
+      document.getElementById('create-pin-screen').classList.remove('show');
+      initApp();
+    } else {
+      document.getElementById('create-pin-err').textContent='PINs don\'t match — try again';
+      pinEntry='';createStep=1;createFirst='';updateCreateDots();
+      document.getElementById('create-pin-step').textContent='Step 1 of 2';
+      document.getElementById('create-pin-title').textContent='Create your PIN';
+      document.getElementById('create-pin-sub').textContent='Choose a 4-digit PIN. Only you will know it.';
+    }
+  }
+}
+
+// ENTER PIN
+function pinKey(k){
+  if(pinEntry.length>=4)return;
+  pinEntry+=k;updatePinDots();
+  if(pinEntry.length===4)setTimeout(checkPin,120);
+}
+function pinDel(){pinEntry=pinEntry.slice(0,-1);updatePinDots();document.getElementById('pin-err').textContent='';}
+function updatePinDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('filled',i<pinEntry.length);}
+function checkPin(){
+  const saved=localStorage.getItem(PIN_KEY);
+  if(pinEntry===saved){
+    document.getElementById('pin-screen').classList.remove('show');
+    initApp();
+  } else {
+    document.getElementById('pin-err').textContent='Wrong PIN 💔';
+    document.getElementById('pin-dots').classList.add('shake');
+    setTimeout(()=>document.getElementById('pin-dots').classList.remove('shake'),400);
+    pinEntry='';updatePinDots();
+  }
+}
+function forgotPin(){
+  if(confirm('This will reset the app and clear your saved setup. Continue?')){
+    localStorage.clear();location.reload();
+  }
+}
+function lockApp(){
+  clearInterval(pollT);
+  document.getElementById('app').style.display='none';
+  pinEntry='';updatePinDots();
+  document.getElementById('pin-err').textContent='';
+  document.getElementById('pin-screen').classList.add('show');
+}
+
+function initApp(){
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='flex';
+  sync('ok','live');loadCloud();startPoll();loadGameData();renderCounters();
+}
+function sync(s,t){document.getElementById('sdot').className='sdot '+s;document.getElementById('stxt').textContent=t;}
+
+async function getCloud(){const r=await fetch(`https://api.jsonbin.io/v3/b/${BIN}/latest`,{headers:{'X-Master-Key':KEY}});if(!r.ok)throw new Error(r.status);return(await r.json()).record||{init:true};}
+async function putCloud(d){const r=await fetch(`https://api.jsonbin.io/v3/b/${BIN}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(d)});if(!r.ok)throw new Error(r.status);}
+async function loadCloud(){
+  sync('busy','…');
+  try{
+    const d=await getCloud();
+    renderMood(d.mood||null);
+    renderChat(d.messages||[]);
+    checkTyping(d.typing||{});
+    renderSimiLocation(d.location&&d.location.simi);
+    if(d.game)renderSyncedGame(d.game);
+    sync('ok','live');
+  }catch(e){sync('err','offline');}
+}
+function startPoll(){pollT=setInterval(()=>loadCloud(),6000);}
+
+async function pushGame(state){
+  if(!BIN||!KEY)return;
+  try{const c=await getCloud();c.game=state;await putCloud(c);}catch(e){}
+}
+
+function renderSyncedGame(g){
+  if(!g||g.from===WHO)return;
+  const syncBox=document.getElementById('sync-game-box');
+  if(!syncBox)return;
+  const timeStr=g.ts?new Date(g.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  syncBox.innerHTML=`
+    <div style="background:rgba(201,96,122,.13);border-radius:16px;padding:14px 16px;border:1px solid rgba(201,96,122,.25);">
+      <div style="font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;">
+        🌸 Simi drew a card · ${timeStr}
+      </div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--rl);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">${esc(g.type||'')}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);line-height:1.55;">${esc(g.card||'')}</div>
+      ${g.game?`<div style="font-size:.68rem;color:var(--dim);margin-top:6px;">Game: ${esc(g.game)}</div>`:''}
+    </div>`;
+  syncBox.style.display='block';
+  if(!document.getElementById('games-page').classList.contains('on'))updateBadge('games',true);
+}
+
+function renderMood(m){
+  const box=document.getElementById('moodContent'),badge=document.getElementById('nbadge');
+  if(!m||!m.timestamp){box.innerHTML='<div class="empty"><div class="empty-icon">🌙</div><p>She hasn\'t shared anything yet.<br>It\'ll appear right here when she does.</p></div>';badge.style.display='none';return;}
+  const isNew=m.unread&&m.timestamp!==lastMoodTS;
+  if(isNew){lastMoodTS=m.timestamp;badge.style.display='inline';toast('💌 Simi shared her mood');markMoodRead(m);if('Notification'in window&&Notification.permission==='granted')new Notification('💌 Simi shared how she feels',{body:`She's feeling "${m.moodLabel}"`});}
+  else badge.style.display='none';
+  const ts=new Date(m.timestamp),mp=(m.mood/7)*100,up=m.urgency||40;
+  const ud=URGS.find(([lo,hi])=>up>=lo&&up<=hi);
+  const rHTML=m.reasons&&m.reasons.length?m.reasons.map(r=>`<span class="tag rtag">${esc(r)}</span>`).join(''):'<span class="none-txt">nothing specific</span>';
+  let fHTML='';if(m.food&&m.food.length)fHTML+=m.food.map(f=>`<span class="tag ftag">${esc(f)}</span>`).join('');if(m.customFood)fHTML+=`<span class="tag ftag">✏️ ${esc(m.customFood)}</span>`;if(!fHTML)fHTML='<span class="none-txt">nothing selected</span>';
+  box.innerHTML=`
+    <div style="padding:0 16px;margin-top:8px;">
+      <div class="mood-card" style="margin-bottom:13px;">
+        <div class="mood-big">${m.moodEmoji}</div>
+        <div class="mood-right"><h3>${esc(m.moodLabel)}</h3><p>her mood right now</p>
+        <div class="mood-bar"><div class="mood-dot" id="mdot" style="left:0%"></div></div></div>
+      </div>
+      <div class="slbl">why she might be feeling this way</div>
+      <div class="icard" style="margin-bottom:13px;">${rHTML}</div>
+      ${m.unsaid?`<div class="slbl">the thing she didn't say out loud</div>
+      <div class="icard" style="margin-bottom:13px;"><div class="unsaid-q">${esc(m.unsaid)}</div></div>`:''}
+      ${m.wants?`<div class="slbl">what she needs from you</div>
+      <div class="icard" style="margin-bottom:13px;">
+        <div class="wants-txt">💛 ${esc(m.wants)}</div>
+        <div class="urg-bar"><div class="urg-fill" style="width:${up}%"></div></div>
+        <div class="urg-txt">${ud?ud[2]:''}</div>
+      </div>`:''}
+      <div class="slbl">she wants to eat</div>
+      <div class="icard" style="margin-bottom:13px;">${fHTML}</div>
+      ${m.vibe?`<div class="slbl">vibe she needs from you</div>
+      <div class="icard" style="margin-bottom:13px;"><div class="vibe-disp">${esc(m.vibe)}</div></div>`:''}
+      <div class="ts-line">${ts.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</div>
+    </div>`;
+  requestAnimationFrame(()=>{const d=document.getElementById('mdot');if(d)setTimeout(()=>d.style.left=mp+'%',100);});
+}
+async function markMoodRead(m){try{const c=await getCloud();if(c.mood)c.mood.unread=false;await putCloud(c);}catch(e){}}
+
+function renderChat(msgs){
+  const box=document.getElementById('messages');
+  if(!msgs||!msgs.length){box.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">💌</div><p>Your private messages will appear here.</p></div>';lastMsgCount=0;return;}
+  if(msgs.length===lastMsgCount)return;
+  const atBot=box.scrollHeight-box.scrollTop-box.clientHeight<60;lastMsgCount=msgs.length;
+  box.innerHTML=msgs.map(m=>{const mine=m.who===WHO;const t=new Date(m.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit',hour12:true});
+    return`<div class="msg ${mine?'mine':'theirs'}"><div class="bubble">${esc(m.text)}</div><div class="msg-time">${t}</div></div>`;}).join('');
+  if(atBot||msgs[msgs.length-1]?.who!==WHO)setTimeout(()=>box.scrollTop=box.scrollHeight,50);
+  if(!document.getElementById('chat-page').classList.contains('on')&&msgs.filter(m=>m.who!==WHO).length)updateBadge('chat',true);
+}
+function checkTyping(ty){const ind=document.getElementById('typingInd');if(ty&&ty.simi)ind.classList.add('show');else ind.classList.remove('show');}
+async function sendMsg(){const inp=document.getElementById('chatInput'),txt=inp.value.trim();if(!txt)return;inp.value='';autoResize(inp);
+  try{const cur=await getCloud();if(!cur.messages)cur.messages=[];cur.messages.push({who:WHO,text:txt,ts:new Date().toISOString()});
+    if(cur.messages.length>200)cur.messages=cur.messages.slice(-200);if(cur.typing)cur.typing.him=false;await putCloud(cur);renderChat(cur.messages);}catch(e){toast('Not sent — try again');}}
+async function onTyping(){clearTimeout(typingT);try{const cur=await getCloud();if(!cur.typing)cur.typing={};cur.typing.him=true;await putCloud(cur);
+  typingT=setTimeout(async()=>{try{const c=await getCloud();if(!c.typing)c.typing={};c.typing.him=false;await putCloud(c);}catch(e){}},3000);}catch(e){}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function toggleEmoji(){document.getElementById('emojiTray').classList.toggle('show');}
+function ins(e){const i=document.getElementById('chatInput');i.value+=e;autoResize(i);document.getElementById('emojiTray').classList.remove('show');i.focus();}
+document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+
+function goPage(p){
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('on'));document.querySelectorAll('.bnt').forEach(b=>b.classList.remove('on'));
+  document.getElementById(p+'-page').classList.add('on');document.getElementById('nav-'+p).classList.add('on');
+  if(p==='chat'){updateBadge('chat',false);setTimeout(()=>{const b=document.getElementById('messages');b.scrollTop=b.scrollHeight;},80);}
+  if(p==='games'){renderWheelItems();updateBadge('games',false);}
+  if(p==='movies'){if(TMDB&&movieQueue.length===0)loadTMDB('trending');else if(!TMDB&&movieQueue.length===0)buildLocalQueue('all');pollMovieMatches();}
+  if(p==='special'){renderCounters();pollSimiLocation();}
+}
+function updateBadge(nav,show){const btn=document.getElementById('nav-'+nav);if(show&&!btn.querySelector('.nbdg')){const d=document.createElement('span');d.className='nbdg';d.style.cssText='position:absolute;top:3px;right:calc(50% - 13px);width:7px;height:7px;border-radius:50%;background:#c9607a;';btn.style.position='relative';btn.appendChild(d);}else if(!show){const d=btn.querySelector('.nbdg');if(d)d.remove();}}
+
+// ══ GAMES ══
+const GK='his_games_s2';
+function loadGameData(){try{return JSON.parse(localStorage.getItem(GK)||'{}');}catch(e){return{};}}
+function saveGameData(d){localStorage.setItem(GK,JSON.stringify(d));}
+function openGame(g){const el=document.getElementById('g-'+g);if(el){el.classList.add('show');if(g==='spin')drawWheel();if(g==='tod')renderTodList();if(g==='dirty')renderCustomList('dirty');if(g==='nhai')renderCustomList('nhai');if(g==='quiz')renderCustomList('quiz');}}
+function closeGame(g){document.getElementById('g-'+g).classList.remove('show');}
+
+// ToD
+let todM='fun',todCtab='truth';
+const TRUTHS_FUN=['What is your most embarrassing memory of us?','Have you ever fake-laughed at something I said?','What do you find most annoying about me (be honest!)?','What was your first impression of me?','What is something you\'ve never told me?','What song best describes our relationship?','What\'s a secret talent you\'ve never shown me?','Have you ever secretly judged my outfit?','Do you have any recurring dreams about me?','If you could change one thing about our relationship what would it be?'];
+const TRUTHS_SPICY=['What\'s the most attractive thing I do without realising?','Have you ever had a dream about me? What happened?','What part of me do you find most attractive?','What\'s your favourite memory of us being physically close?','What is your love language and does our relationship fulfil it?','What\'s something you want me to do more?','If we were stranded alone for a week, what would we do?','What\'s your favourite physical thing about me?'];
+const DARES_FUN=['Send a voice note saying three things you love about me','Write a poem about me and read it aloud','Do your best impression of me','Send a silly selfie right now','Tell me a secret you\'ve never told anyone','Sing the last song you listened to','Text me the most random thought you\'ve had today'];
+const DARES_SPICY=['Send your most attractive selfie right now','Describe what you\'d do if we were alone tonight 😏','Tell me exactly what you find irresistible about me','Voice note me whispering something sweet','Describe your ideal night together in detail','Tell me the last thing you thought about me before sleeping'];
+function todMode(m){todM=m;document.getElementById('tod-fun').classList.toggle('on',m==='fun');document.getElementById('tod-spicy').classList.toggle('on',m==='spicy');}
+function drawTod(type){
+  const d=loadGameData();let pool=type==='truth'?(todM==='fun'?TRUTHS_FUN:TRUTHS_SPICY):(todM==='fun'?DARES_FUN:DARES_SPICY);
+  const custom=(d.tod&&d.tod[type])||[];pool=[...pool,...custom];
+  const q=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('tod-badge').textContent=type.toUpperCase();
+  document.getElementById('tod-badge').className='q-badge '+(type==='truth'?'truth':'dare');
+  document.getElementById('tod-text').textContent=q;
+  pushGame({from:WHO,game:'Truth or Dare',type:type.toUpperCase()+' ('+(todM==='fun'?'Fun':'Spicy')+')',card:q,ts:new Date().toISOString()});
+}
+function switchCtab(t){todCtab=t;document.getElementById('ctab-truth').classList.toggle('on',t==='truth');document.getElementById('ctab-dare').classList.toggle('on',t==='dare');renderTodList();}
+function addCustomTod(){const inp=document.getElementById('tod-cinp'),v=inp.value.trim();if(!v)return;const d=loadGameData();if(!d.tod)d.tod={};if(!d.tod[todCtab])d.tod[todCtab]=[];d.tod[todCtab].push(v);saveGameData(d);inp.value='';renderTodList();}
+function renderTodList(){const d=loadGameData();const items=(d.tod&&d.tod[todCtab])||[];const box=document.getElementById('tod-list');box.innerHTML=items.map((it,i)=>`<div class="citem"><span class="citem-text">${esc(it)}</span><button class="citem-del" onclick="delTod('${todCtab}',${i})">×</button></div>`).join('');}
+function delTod(t,i){const d=loadGameData();if(d.tod&&d.tod[t])d.tod[t].splice(i,1);saveGameData(d);renderTodList();}
+
+// Dirty
+let dirtyM='mild';
+const DIRTY_MILD=['What\'s your favourite physical feature of mine?','What outfit of mine do you find most attractive?','Have you ever gotten butterflies just from a message I sent?','What\'s the most romantic thing you\'ve imagined us doing?','What\'s something you want me to say to you more often?','Tell me about a time you found me irresistible.','Have you ever wanted to kiss me and held back?'];
+const DIRTY_WILD=['What\'s your biggest fantasy involving me?','Describe the most passionate version of our ideal night alone.','Where\'s the most unexpected place you\'d want to be alone with me?','What do I do that drives you absolutely crazy (in the best way)?','If you could have me any way you wanted tonight, what would happen?','What\'s something you\'ve always wanted to try with me but haven\'t said?','What\'s a desire you\'ve kept secret that you want me to know?'];
+function dirtyMode(m){dirtyM=m;document.getElementById('dirty-mild').classList.toggle('on',m==='mild');document.getElementById('dirty-wild').classList.toggle('on',m==='wild');}
+function drawDirty(){
+  const d=loadGameData();let pool=dirtyM==='mild'?DIRTY_MILD:DIRTY_WILD;const custom=(d.dirty)||[];pool=[...pool,...custom];
+  const q=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('dirty-text').textContent=q;
+  pushGame({from:WHO,game:'Dirty Questions',type:dirtyM==='mild'?'MILD 😏':'WILD 🔥',card:q,ts:new Date().toISOString()});
+}
+
+// Quiz
+let quizCorrect=0,quizTotal=0;
+const QUIZ_QS=[
+  {q:'What is Simi\'s favourite colour?',a:'ask her!',opts:['Red','Blue','Pink','Black']},
+  {q:'What food could Simi eat every day?',a:'From your chats',opts:['Rice','Biryani','Noodles','Pizza']},
+  {q:'What\'s Simi\'s love language?',a:'Talk about it',opts:['Words of affirmation','Physical touch','Quality time','Gifts']},
+  {q:'What\'s Simi\'s dream travel destination?',a:'Ask her!',opts:['Maldives','Paris','Turkey','Japan']},
+  {q:'How does Simi like her tea/coffee?',a:'Ask her!',opts:['Sweet','Bitter','Milky','No sugar']},
+  {q:'What\'s Simi\'s biggest fear?',a:'Share honestly',opts:['Losing someone','Failure','Being alone','Darkness']},
+  {q:'What makes Simi laugh the most?',a:'You know!',opts:['Memes','Silly voices','Inside jokes','Random things']},
+  {q:'What\'s Simi\'s favourite season?',a:'Discuss!',opts:['Summer','Winter','Monsoon','Spring']},
+  {q:'What\'s Simi\'s go-to comfort show?',a:'Ask her!',opts:['Friends','Squid Game','Twilight','Kdrama']},
+  {q:'What is Simi\'s biggest pet peeve?',a:'Discuss!',opts:['Being late','Loud chewing','Mess','Being ignored']},
+];
+function drawQuiz(){
+  const d=loadGameData();const custom=(d.quiz)||[];const all=[...QUIZ_QS,...custom.map(c=>({q:c.q,a:c.a,opts:[]}))];
+  const cur=all[Math.floor(Math.random()*all.length)];quizTotal++;
+  document.getElementById('quiz-total').textContent=quizTotal;
+  document.getElementById('quiz-text').textContent=cur.q;
+  const optsEl=document.getElementById('quiz-opts');
+  if(cur.opts&&cur.opts.length){optsEl.innerHTML=cur.opts.map(o=>`<div class="quiz-opt" onclick="checkQuiz(this,'${o.replace(/'/g,"\\'")}','${(cur.a||'').replace(/'/g,"\\'")}')">${esc(o)}</div>`).join('');}
+  else{optsEl.innerHTML=`<div class="quiz-opt" style="grid-column:span 2;background:rgba(201,96,122,.15);color:var(--rl);border-color:var(--r);">Answer: ${esc(cur.a)}</div>`;}
+  pushGame({from:WHO,game:'Couple Quiz',type:'QUESTION',card:cur.q,ts:new Date().toISOString()});
+}
+function checkQuiz(el,chosen,ans){document.querySelectorAll('.quiz-opt').forEach(o=>o.style.pointerEvents='none');if(chosen.toLowerCase()===ans.toLowerCase()){el.classList.add('correct');quizCorrect++;document.getElementById('quiz-correct').textContent=quizCorrect;}else el.classList.add('wrong');setTimeout(()=>{document.querySelectorAll('.quiz-opt').forEach(o=>{o.classList.remove('correct','wrong');o.style.pointerEvents='';});},1200);}
+function addCustomQuiz(){const qi=document.getElementById('quiz-q-cinp'),ai=document.getElementById('quiz-a-cinp');const q=qi.value.trim(),a=ai.value.trim();if(!q||!a)return;const d=loadGameData();if(!d.quiz)d.quiz=[];d.quiz.push({q,a,opts:[]});saveGameData(d);qi.value='';ai.value='';renderCustomList('quiz');}
+
+// NHAI
+let nhaiMeScore=0,nhaiHimScore=0;
+const NHAI_QS=['kissed on the first date','stayed up all night talking','sent a risky text to the wrong person','cried at a movie in public','eaten an entire pizza alone','pretended to be busy to avoid someone','read someone\'s messages without telling them','laughed so hard I cried','danced when no one was watching','said \'I love you\' first in a relationship','travelled alone','gone a week without social media','written someone a letter I never sent','ghosted someone (even a little)','called someone the wrong name on a date','had a secret crush on a friend\'s partner','stayed in a relationship too long','cried after an argument and not told anyone why'];
+function drawNhai(){
+  const d=loadGameData();const pool=[...NHAI_QS,...(d.nhai||[])];
+  const q=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('nhai-text').textContent='… '+q;
+  pushGame({from:WHO,game:'Never Have I Ever',type:'NEVER HAVE I EVER',card:q,ts:new Date().toISOString()});
+}
+function nhaiVote(yes){if(yes){nhaiMeScore++;document.getElementById('nhai-me').textContent=nhaiMeScore;}drawNhai();}
+
+// SPIN
+const DEFAULT_SPIN=['Cook together 🍳','Watch a movie 🎬','Go for a walk 🌙','Play a board game 🎲','Give each other massages 💆','Write love letters 💌','Video call for 1 hour 📱','Share playlists 🎶','Plan a future date 📅','Share 10 things you love about each other ❤️'];
+const WHEEL_COLORS=['#f47ab0','#fbbf24','#34d399','#60a5fa','#a78bfa','#fb923c','#f87171','#5ecc8b','#e879f9','#38bdf8'];
+let spinning=false,wheelAngle=0;
+function getWheelItems(){const d=loadGameData();return(d.spin&&d.spin.length)?d.spin:[...DEFAULT_SPIN];}
+function saveWheelItems(items){const d=loadGameData();d.spin=items;saveGameData(d);}
+function addWheelItem(){const inp=document.getElementById('spin-cinp'),v=inp.value.trim();if(!v)return;const items=getWheelItems();items.push(v);saveWheelItems(items);inp.value='';renderWheelItems();drawWheel();}
+function delWheelItem(i){const items=getWheelItems();items.splice(i,1);if(!items.length)items.push(...DEFAULT_SPIN);saveWheelItems(items);renderWheelItems();drawWheel();}
+function renderWheelItems(){const items=getWheelItems();document.getElementById('wheelItemsList').innerHTML=items.map((it,i)=>`<div class="wi-row"><div class="wi-dot" style="background:${WHEEL_COLORS[i%WHEEL_COLORS.length]}"></div><div class="wi-name">${esc(it)}</div><button class="wi-del" onclick="delWheelItem(${i})">×</button></div>`).join('');}
+function drawWheel(){const items=getWheelItems();const canvas=document.getElementById('wheelCanvas');if(!canvas)return;const ctx=canvas.getContext('2d');const cx=120,cy=120,r=115,n=items.length,arc=2*Math.PI/n;ctx.clearRect(0,0,240,240);items.forEach((item,i)=>{const start=wheelAngle+i*arc,end=start+arc;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,end);ctx.closePath();ctx.fillStyle=WHEEL_COLORS[i%WHEEL_COLORS.length];ctx.fill();ctx.strokeStyle='rgba(18,10,14,.4)';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(start+arc/2);ctx.textAlign='right';ctx.fillStyle='white';ctx.font='bold 11px DM Sans,sans-serif';const label=item.length>14?item.substring(0,14)+'…':item;ctx.fillText(label,r-8,4);ctx.restore();});ctx.beginPath();ctx.arc(cx,cy,15,0,2*Math.PI);ctx.fillStyle='rgba(18,10,14,.8)';ctx.fill();}
+function doSpin(){if(spinning)return;spinning=true;const items=getWheelItems();const btn=document.getElementById('spinBtn');btn.disabled=true;const totalAngle=(5+Math.random()*5)*2*Math.PI+Math.random()*2*Math.PI;const dur=3500,start=performance.now(),startAngle=wheelAngle;function frame(now){const elapsed=now-start,prog=Math.min(elapsed/dur,1),ease=1-Math.pow(1-prog,4);wheelAngle=startAngle+totalAngle*ease;drawWheel();if(prog<1){requestAnimationFrame(frame);}else{spinning=false;btn.disabled=false;const n=items.length,arc=2*Math.PI/n,norm=((-wheelAngle%(2*Math.PI))+(2*Math.PI))%(2*Math.PI),idx=Math.floor(norm/arc)%n;const result=items[idx];document.getElementById('spinResult').textContent='🎯 '+result;pushGame({from:WHO,game:'Spin the Wheel',type:'🎯 LANDED ON',card:result,ts:new Date().toISOString()});}}requestAnimationFrame(frame);}
+
+// Generic custom
+function addCustom(type){const inp=document.getElementById(type+'-cinp'),v=inp.value.trim();if(!v)return;const d=loadGameData();if(!d[type])d[type]=[];d[type].push(v);saveGameData(d);inp.value='';renderCustomList(type);}
+function renderCustomList(type){const d=loadGameData();const items=d[type]||[];const box=document.getElementById(type+'-list');if(!box)return;box.innerHTML=items.map((it,i)=>{const text=typeof it==='object'?`${it.q} → ${it.a}`:it;return`<div class="citem"><span class="citem-text">${esc(text)}</span><button class="citem-del" onclick="delCustom('${type}',${i})">×</button></div>`;}).join('');}
+function delCustom(type,i){const d=loadGameData();if(d[type])d[type].splice(i,1);saveGameData(d);renderCustomList(type);}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ══════════════════════════════════
+// ══ STEP 4 — COUNTERS ⏳ ══
+// ══════════════════════════════════
+const CNT_KEY='his_counters_s4';
+function loadCounters(){try{return JSON.parse(localStorage.getItem(CNT_KEY)||'[]');}catch(e){return[];}}
+function saveCounters(d){localStorage.setItem(CNT_KEY,JSON.stringify(d));}
+
+function addCounter(){
+  const name=document.getElementById('cnt-name').value.trim();
+  const date=document.getElementById('cnt-date').value;
+  if(!name||!date){toast('Enter a name and date');return;}
+  const counters=loadCounters();
+  counters.push({name,date,emoji:getCounterEmoji(name),monthly:document.getElementById('cnt-monthly').checked,yearly:document.getElementById('cnt-yearly').checked});
+  saveCounters(counters);
+  document.getElementById('cnt-name').value='';document.getElementById('cnt-date').value='';
+  renderCounters();toast('Added! 💍');
+  if(BIN&&KEY)syncCounters(counters);
+}
+function getCounterEmoji(name){const n=name.toLowerCase();if(n.includes('wedding')||n.includes('married'))return'💒';if(n.includes('love')||n.includes('anniversary'))return'❤️';if(n.includes('first date')||n.includes('met'))return'🌸';if(n.includes('birthday'))return'🎂';if(n.includes('engage'))return'💍';return'✨';}
+
+function renderCounters(){
+  const box=document.getElementById('countersList');if(!box)return;
+  const counters=loadCounters();
+  if(!counters.length){box.innerHTML='<div class="icard" style="margin-bottom:14px;text-align:center;"><div style="font-size:2rem;margin-bottom:8px;">💍</div><div style="font-size:.82rem;color:var(--dim);">No occasions yet. Add your anniversary below!</div></div>';return;}
+  box.innerHTML=counters.map((c,i)=>{
+    const start=new Date(c.date),now=new Date();
+    const totalDays=Math.floor((now-start)/(1000*60*60*24));
+    const years=Math.floor(totalDays/365),months=Math.floor((totalDays%365)/30),days=totalDays%30;
+    const nextAnn=new Date(start);nextAnn.setFullYear(now.getFullYear());if(nextAnn<now)nextAnn.setFullYear(now.getFullYear()+1);
+    const daysToAnn=Math.ceil((nextAnn-now)/(1000*60*60*24));
+    const nextMonth=new Date(now.getFullYear(),now.getMonth(),start.getDate());if(nextMonth<=now)nextMonth.setMonth(nextMonth.getMonth()+1);
+    const daysToMonth=Math.ceil((nextMonth-now)/(1000*60*60*24));
+    return`<div class="icard" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.5rem;">${c.emoji}</span>
+          <div><div style="font-family:'Playfair Display',serif;font-size:.93rem;color:var(--text);">${esc(c.name)}</div>
+          <div style="font-size:.67rem;color:var(--dim);">${new Date(c.date).toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})}</div></div>
+        </div>
+        <button style="background:none;border:none;color:#f87171;font-size:1rem;cursor:pointer;" onclick="delCounter(${i})">×</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+        <div style="text-align:center;background:rgba(201,96,122,.15);border-radius:12px;padding:10px 6px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--rl);">${years}</div><div style="font-size:.62rem;color:var(--dim);">years</div></div>
+        <div style="text-align:center;background:rgba(255,255,255,.06);border-radius:12px;padding:10px 6px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--rl);">${months}</div><div style="font-size:.62rem;color:var(--dim);">months</div></div>
+        <div style="text-align:center;background:rgba(255,255,255,.06);border-radius:12px;padding:10px 6px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--rl);">${days}</div><div style="font-size:.62rem;color:var(--dim);">days</div></div>
+      </div>
+      <div style="font-size:.71rem;color:var(--dim);line-height:1.8;">${totalDays} days together 💕<br>
+        ${c.yearly?`🎉 Next anniversary in <strong style="color:var(--rl);">${daysToAnn} days</strong><br>`:''}
+        ${c.monthly?`📅 Next monthly in <strong style="color:var(--rl);">${daysToMonth} days</strong>`:''}
+      </div></div>`;
+  }).join('');
+  checkAnniversaryReminders(counters);
+}
+function delCounter(i){const c=loadCounters();c.splice(i,1);saveCounters(c);renderCounters();if(BIN&&KEY)syncCounters(c);}
+async function syncCounters(counters){try{const cloud=await getCloud();cloud.counters=counters;await putCloud(cloud);}catch(e){}}
+function checkAnniversaryReminders(counters){
+  if(!('Notification'in window)||Notification.permission!=='granted')return;
+  const today=new Date();
+  counters.forEach(c=>{
+    const start=new Date(c.date);
+    if(c.yearly){const ann=new Date(today.getFullYear(),start.getMonth(),start.getDate());const diff=Math.ceil((ann-today)/(1000*60*60*24));if(diff===0)new Notification(`🎉 ${c.name} Anniversary!`,{body:`Today is your ${c.name}! 💕`});if(diff===1)new Notification(`💍 Tomorrow: ${c.name}`,{body:"Don't forget to celebrate 🌸"});}
+    if(c.monthly){const thisMonth=new Date(today.getFullYear(),today.getMonth(),start.getDate());const diff=Math.ceil((thisMonth-today)/(1000*60*60*24));if(diff===0)new Notification(`💕 Monthly ${c.name}`,{body:"It's been another month together! 🌸"});}
+  });
+}
+
+// ══════════════════════════
+// ══ STEP 4 — LOCATION 📍 ══
+// ══════════════════════════
+let locWatchId=null,sharingLocation=false;
+async function toggleLocation(){
+  const btn=document.getElementById('loc-btn'),status=document.getElementById('loc-status');
+  if(sharingLocation){
+    if(locWatchId)navigator.geolocation.clearWatch(locWatchId);
+    sharingLocation=false;btn.textContent='Share 📍';status.textContent='Not sharing';
+    document.getElementById('loc-preview').style.display='none';
+    try{const cloud=await getCloud();if(cloud.location)cloud.location.him=null;await putCloud(cloud);}catch(e){}
+    return;
+  }
+  if(!navigator.geolocation){toast('Geolocation not supported');return;}
+  btn.textContent='Getting...';
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    sharingLocation=true;btn.textContent='Stop sharing';status.textContent='Sharing live 📍';
+    await pushLocation(pos);
+    locWatchId=navigator.geolocation.watchPosition(pushLocation,()=>{},{enableHighAccuracy:true,maximumAge:30000});
+  },()=>{btn.textContent='Share 📍';toast('Allow location permission');},{enableHighAccuracy:true,timeout:10000});
+}
+async function pushLocation(pos){
+  const {latitude:lat,longitude:lng}=pos.coords;
+  const preview=document.getElementById('loc-preview');
+  preview.style.display='block';
+  preview.innerHTML=`📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}<br><a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" style="color:var(--rl);font-size:.72rem;">Open in Maps →</a>`;
+  if(!BIN||!KEY)return;
+  try{const cloud=await getCloud();if(!cloud.location)cloud.location={};cloud.location.him={lat,lng,ts:new Date().toISOString()};await putCloud(cloud);}catch(e){}
+}
+function renderSimiLocation(loc){
+  const el=document.getElementById('simi-loc-text'),ml=document.getElementById('simi-loc-map'),tEl=document.getElementById('simi-loc-time');
+  if(!el)return;
+  if(!loc){el.textContent="She hasn't shared her location yet.";if(ml)ml.style.display='none';return;}
+  el.textContent=`📍 ${Number(loc.lat).toFixed(5)}, ${Number(loc.lng).toFixed(5)}`;
+  if(ml){ml.style.display='block';const link=document.getElementById('simi-loc-link');if(link)link.href=`https://maps.google.com/?q=${loc.lat},${loc.lng}`;}
+  if(tEl&&loc.ts){const t=new Date(loc.ts);tEl.textContent='Updated '+t.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',hour12:true});}
+}
+async function pollSimiLocation(){if(!BIN||!KEY)return;try{const cloud=await getCloud();renderSimiLocation(cloud.location&&cloud.location.simi);}catch(e){}}
+
+// ══════════════════════════════════════
+// ══ STEP 3 — MOVIES (TMDB powered) ══
+// ══════════════════════════════════════
+const MOVIE_SK='his_movies_s3';
+let movieCat='trending',movieQueue=[],movieIdx=0,swipeHistory=[];
+const LANG_MAP={bn:'bn',hi:'hi',ko:'ko',en:'en'};
+const LANG_LABEL={bn:'🇧🇩 Bangla',hi:'🇮🇳 Hindi',ko:'🇰🇷 Korean',en:'🌍 English',custom:'⭐ Custom'};
+
+function loadMovieLocal(){try{return JSON.parse(localStorage.getItem(MOVIE_SK)||'{}');}catch(e){return{};}}
+function saveMovieLocal(d){localStorage.setItem(MOVIE_SK,JSON.stringify(d));}
+function getAllCustom(){const d=loadMovieLocal();return(d.custom||[]).map(m=>({...m,source:'custom'}));}
+
+async function tmdbFetch(endpoint,params={}){
+  if(!TMDB)return null;
+  const url=new URL(`https://api.themoviedb.org/3${endpoint}`);
+  url.searchParams.set('api_key',TMDB);url.searchParams.set('include_adult','false');
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  const r=await fetch(url);if(!r.ok)return null;return r.json();
+}
+
+function tmdbToMovie(item){return{id:'tmdb_'+item.id,tmdbId:item.id,title:item.title||item.name||'Unknown',type:item.media_type==='tv'||item.first_air_date?'Series':'Movie',genre:item.genre_ids?genreLabel(item.genre_ids):'',poster:item.poster_path?`https://image.tmdb.org/t/p/w342${item.poster_path}`:null,rating:item.vote_average?(item.vote_average/2).toFixed(1):null,lang:item.original_language||'en',year:(item.release_date||item.first_air_date||'').slice(0,4),source:'tmdb'};}
+const GENRE_MAP={28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',18:'Drama',10749:'Romance',878:'Sci-Fi',53:'Thriller',27:'Horror',10402:'Music',14:'Fantasy',10751:'Family'};
+function genreLabel(ids){return ids.slice(0,2).map(i=>GENRE_MAP[i]||'').filter(Boolean).join(' / ')||'Drama';}
+
+const LOCAL_MOVIES=[
+  {id:'bn1',title:'Hawa',lang:'bn',type:'Movie',genre:'Thriller',poster:null,year:'2022'},{id:'bn2',title:'Poran',lang:'bn',type:'Movie',genre:'Thriller',poster:null,year:'2022'},
+  {id:'bn3',title:'Aynabaji',lang:'bn',type:'Movie',genre:'Crime Drama',poster:null,year:'2016'},{id:'bn4',title:'Monpura',lang:'bn',type:'Movie',genre:'Romance',poster:null,year:'2009'},
+  {id:'bn5',title:'Debi',lang:'bn',type:'Movie',genre:'Supernatural',poster:null,year:'2018'},{id:'bn6',title:'Rehana Maryam Noor',lang:'bn',type:'Movie',genre:'Drama',poster:null,year:'2021'},
+  {id:'hi1',title:'Tamasha',lang:'hi',type:'Movie',genre:'Romance / Drama',poster:null,year:'2015'},{id:'hi2',title:'ZNMD',lang:'hi',type:'Movie',genre:'Comedy / Drama',poster:null,year:'2011'},
+  {id:'hi3',title:'Mirzapur',lang:'hi',type:'Series',genre:'Crime / Thriller',poster:null,year:'2018'},{id:'hi4',title:'Scam 1992',lang:'hi',type:'Series',genre:'Biography',poster:null,year:'2020'},
+  {id:'en1',title:'Before Sunrise',lang:'en',type:'Movie',genre:'Romance',poster:null,year:'1995'},{id:'en2',title:'About Time',lang:'en',type:'Movie',genre:'Romance',poster:null,year:'2013'},
+  {id:'en3',title:'La La Land',lang:'en',type:'Movie',genre:'Musical / Romance',poster:null,year:'2016'},{id:'en4',title:'Interstellar',lang:'en',type:'Movie',genre:'Sci-Fi',poster:null,year:'2014'},
+  {id:'ko1',title:'Crash Landing on You',lang:'ko',type:'Series',genre:'Romance',poster:null,year:'2019'},{id:'ko2',title:'Goblin',lang:'ko',type:'Series',genre:'Fantasy / Romance',poster:null,year:'2016'},
+  {id:'ko3',title:'Parasite',lang:'ko',type:'Movie',genre:'Thriller',poster:null,year:'2019'},{id:'ko4',title:'Reply 1988',lang:'ko',type:'Series',genre:'Coming-of-age',poster:null,year:'2015'},
+];
+
+function buildLocalQueue(cat){
+  const d=loadMovieLocal();const swiped=d.him_swipes||{};
+  let pool=[...LOCAL_MOVIES,...getAllCustom()];
+  if(cat&&cat!=='all'&&cat!=='trending'&&cat!=='new'&&cat!=='romantic')pool=pool.filter(m=>m.lang===cat);
+  movieQueue=pool.filter(m=>!swiped[m.id]);
+  for(let i=movieQueue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[movieQueue[i],movieQueue[j]]=[movieQueue[j],movieQueue[i]];}
+  movieIdx=0;swipeHistory=[];showNextCard();
+}
+
+function toggleMovieSections(cat){
+  document.getElementById('swipe-section').style.display=(cat==='matches'||cat==='custom')?'none':'block';
+  document.getElementById('swipeDone').style.display='none';
+  document.getElementById('matches-section').style.display=cat==='matches'?'block':'none';
+  document.getElementById('movie-add-section').style.display=cat==='custom'?'block':'none';
+}
+
+async function loadTMDB(cat,btn){
+  if(btn){document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
+  movieCat=cat;toggleMovieSections(cat);
+  if(cat==='matches'){renderMatchesList();return;}
+  if(cat==='custom'){renderCustomMovieList();return;}
+  const slot=document.getElementById('movieCardSlot');
+  slot.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:.82rem;color:var(--dim);">Loading movies... 🎬</div>';
+  document.getElementById('swipeDone').style.display='none';
+  const d=loadMovieLocal();const swiped=d.him_swipes||{};
+  let data=null;
+  try{
+    if(cat==='trending')data=await tmdbFetch('/trending/all/week',{});
+    else if(cat==='new')data=await tmdbFetch('/movie/now_playing',{region:'BD'});
+    else if(cat==='romantic')data=await tmdbFetch('/discover/movie',{with_genres:'10749',sort_by:'popularity.desc'});
+    else if(LANG_MAP[cat])data=await tmdbFetch('/discover/movie',{with_original_language:LANG_MAP[cat],sort_by:'popularity.desc'});
+    if(!data)throw new Error('no tmdb');
+  }catch(e){buildLocalQueue(cat);return;}
+  movieQueue=(data.results||[]).map(tmdbToMovie).filter(m=>!swiped[m.id]);
+  if(cat==='trending'||cat==='all')movieQueue=[...movieQueue,...getAllCustom().filter(m=>!swiped[m.id])];
+  movieIdx=0;swipeHistory=[];showNextCard();
+}
+
+function setMovieCat(cat,btn){if(TMDB)loadTMDB(cat,btn);else buildLocalQueue(cat);}
+
+function showNextCard(){
+  const slot=document.getElementById('movieCardSlot'),done=document.getElementById('swipeDone');
+  if(movieIdx>=movieQueue.length){slot.innerHTML='';done.style.display='block';return;}
+  done.style.display='none';
+  const m=movieQueue[movieIdx];
+  const langL=LANG_LABEL[m.lang]||m.lang;
+  const stars=m.rating?'⭐ '+m.rating:'';
+  const posterHTML=m.poster
+    ?`<img src="${m.poster}" style="width:100%;height:220px;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div style="display:none;height:220px;background:linear-gradient(135deg,rgba(201,96,122,.25),rgba(107,40,65,.3));align-items:center;justify-content:center;font-size:3.5rem;">🎬</div>`
+    :`<div style="height:220px;background:linear-gradient(135deg,rgba(201,96,122,.25),rgba(107,40,65,.3));display:flex;align-items:center;justify-content:center;font-size:3.5rem;">🎬</div>`;
+  slot.innerHTML=`<div class="movie-card" id="activeCard" data-id="${m.id}">
+    ${posterHTML}
+    <div class="mc-info">
+      <div class="mc-title">${esc(m.title)}</div>
+      <div class="mc-meta">
+        <span class="mc-badge lang-${m.lang in LANG_MAP?m.lang:'en'}">${langL}</span>
+        <span class="mc-badge" style="background:rgba(255,255,255,.07);color:var(--dim);">${m.type}</span>
+        ${m.year?`<span class="mc-badge" style="background:rgba(96,165,250,.15);color:#93c5fd;">${m.year}</span>`:''}
+        ${stars?`<span class="mc-badge" style="background:rgba(251,191,36,.15);color:#fcd34d;">${stars}</span>`:''}
+      </div>
+      <div class="mc-genre">${m.genre||''}</div>
+    </div>
+  </div>`;
+  setupCardDrag();
+}
+
+function setupCardDrag(){
+  const card=document.getElementById('activeCard');if(!card)return;
+  let startX=0,dx=0;
+  const hY=document.getElementById('hintYes'),hN=document.getElementById('hintNo');
+  function start(e){startX=e.touches?e.touches[0].clientX:e.clientX;dx=0;}
+  function move(e){const cx=e.touches?e.touches[0].clientX:e.clientX;dx=cx-startX;card.style.transform=`translateX(${dx}px) rotate(${dx*0.04}deg)`;const ratio=Math.min(Math.abs(dx)/100,1);hY.style.opacity=dx>20?ratio:0;hN.style.opacity=dx<-20?ratio:0;if(Math.abs(dx)>5)e.preventDefault();}
+  function end(){card.style.transform='';hY.style.opacity=0;hN.style.opacity=0;if(dx>80)swipeCard(true);else if(dx<-80)swipeCard(false);}
+  card.addEventListener('mousedown',start);card.addEventListener('touchstart',start,{passive:true});
+  document.addEventListener('mousemove',move);document.addEventListener('touchmove',move,{passive:false});
+  document.addEventListener('mouseup',end,{once:true});document.addEventListener('touchend',end,{once:true});
+}
+
+async function swipeCard(liked){
+  const card=document.getElementById('activeCard');if(!card)return;
+  const id=card.dataset.id;card.classList.add(liked?'fly-right':'fly-left');swipeHistory.push({id,liked});
+  const d=loadMovieLocal();if(!d.him_swipes)d.him_swipes={};d.him_swipes[id]=liked;saveMovieLocal(d);
+  movieIdx++;setTimeout(()=>showNextCard(),380);
+  if(liked)await syncSwipeAndCheckMatch(id);
+}
+function undoSwipe(){if(!swipeHistory.length)return;const last=swipeHistory.pop();movieIdx--;const d=loadMovieLocal();if(d.him_swipes)delete d.him_swipes[last.id];saveMovieLocal(d);showNextCard();toast('↩ Undone!');}
+
+async function syncSwipeAndCheckMatch(id){
+  if(!BIN||!KEY)return;
+  try{
+    const cloud=await getCloud();if(!cloud.swipes)cloud.swipes={};if(!cloud.swipes.him)cloud.swipes.him={};
+    cloud.swipes.him[id]=true;
+    if(cloud.swipes.simi&&cloud.swipes.simi[id]){if(!cloud.matches)cloud.matches=[];if(!cloud.matches.includes(id)){cloud.matches.push(id);await putCloud(cloud);showMatchFlash(id);}else await putCloud(cloud);}
+    else await putCloud(cloud);
+  }catch(e){}
+}
+function showMatchFlash(id){const m=movieQueue.find(mv=>mv.id===id)||getAllCustom().find(mv=>mv.id===id);document.getElementById('mfMovie').textContent=m?m.title:id;document.getElementById('matchFlash').classList.add('show');}
+function closeMatchFlash(){document.getElementById('matchFlash').classList.remove('show');}
+function resetSwipes(){const d=loadMovieLocal();d.him_swipes={};d.shownMatches=[];saveMovieLocal(d);document.getElementById('swipeDone').style.display='none';if(TMDB)loadTMDB(movieCat);else buildLocalQueue(movieCat);toast('Starting fresh! 🎬');}
+
+async function renderMatchesList(){
+  const box=document.getElementById('matchesList');
+  box.innerHTML='<div style="font-size:.79rem;color:var(--dim);padding:8px 0;">Loading...</div>';
+  try{
+    const cloud=await getCloud();const ids=cloud.matches||[];
+    if(!ids.length){box.innerHTML='<div style="font-size:.81rem;color:var(--dim);padding:8px 0;">No matches yet — keep swiping! 🎬</div>';return;}
+    box.innerHTML=ids.map(id=>{const m=movieQueue.find(mv=>mv.id===id)||getAllCustom().find(mv=>mv.id===id)||LOCAL_MOVIES.find(mv=>mv.id===id);if(!m)return`<div class="match-item"><div class="mi-poster">🎬</div><div><div class="mi-title">${id}</div></div></div>`;
+      return`<div class="match-item">${m.poster?`<img src="${m.poster}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;">`:` <div class="mi-poster">${m.emoji||'🎬'}</div>`}<div><div class="mi-title">${esc(m.title)}</div><div class="mi-meta">${(m.lang||'').toUpperCase()} · ${m.type||''}</div></div></div>`;}).join('');
+  }catch(e){box.innerHTML='<div style="font-size:.79rem;color:var(--dim);">Could not load</div>';}
+}
+
+function addCustomMovie(){
+  const t=document.getElementById('cm-title').value.trim();if(!t){toast('Enter a title');return;}
+  const lang=document.getElementById('cm-lang').value,type=document.getElementById('cm-type').value;
+  const genre=document.getElementById('cm-genre').value.trim()||'Custom';
+  const d=loadMovieLocal();if(!d.custom)d.custom=[];
+  d.custom.push({id:'c_'+Date.now(),title:t,lang,type,genre,emoji:'⭐'});
+  saveMovieLocal(d);document.getElementById('cm-title').value='';document.getElementById('cm-genre').value='';
+  renderCustomMovieList();toast('Added! ⭐');
+}
+function renderCustomMovieList(){
+  const d=loadMovieLocal();const items=d.custom||[];const box=document.getElementById('custom-movie-list');
+  box.innerHTML=items.length?items.map((m,i)=>`<div class="citem"><span class="citem-text">${esc(m.title)} (${m.lang.toUpperCase()})</span><button class="citem-del" onclick="delCustomMovie(${i})">×</button></div>`).join(''):'<div style="font-size:.77rem;color:var(--dim);">No custom movies yet.</div>';
+}
+function delCustomMovie(i){const d=loadMovieLocal();if(d.custom)d.custom.splice(i,1);saveMovieLocal(d);renderCustomMovieList();}
+
+async function pollMovieMatches(){
+  if(!BIN||!KEY)return;
+  try{const cloud=await getCloud();const ids=cloud.matches||[];if(!ids.length)return;const d=loadMovieLocal();const shown=d.shownMatches||[];ids.forEach(id=>{if(!shown.includes(id)){shown.push(id);showMatchFlash(id);}});d.shownMatches=shown;saveMovieLocal(d);}catch(e){}
+}
+
+
+loadSetup();
+if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
+</script>
+</body>
+</html>
