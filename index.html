@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our App 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#fff0f4,#fde8ef 40%,#fef8f0);
+  padding:32px 20px;overflow:hidden;position:relative;
+}
+body::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,130,154,.2),transparent 70%);
+  top:-140px;right:-140px;animation:blob 9s ease-in-out infinite;}
+body::after{content:'';position:absolute;width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle,rgba(184,84,112,.12),transparent 70%);
+  bottom:-80px;left:-80px;animation:blob 13s ease-in-out infinite reverse;}
+@keyframes blob{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(14px,-18px) scale(1.06);}}
+
+.inner{position:relative;z-index:1;text-align:center;max-width:320px;width:100%;}
+.heart{font-size:3.5rem;display:block;margin-bottom:14px;animation:hb 2.5s ease-in-out infinite;}
+@keyframes hb{0%,100%{transform:scale(1);}15%{transform:scale(1.18);}30%{transform:scale(1);}45%{transform:scale(1.1);}}
+h1{font-family:'Playfair Display',serif;font-size:2.2rem;color:#2c1a22;margin-bottom:6px;}
+h1 em{color:#b85470;font-style:italic;}
+p{font-size:.82rem;color:#a07888;margin-bottom:36px;line-height:1.65;font-weight:300;}
+
+.cards{display:flex;flex-direction:column;gap:14px;}
+.app-card{
+  background:rgba(255,255,255,.88);border-radius:22px;padding:22px 22px;
+  box-shadow:0 6px 30px rgba(180,60,90,.12);border:1px solid rgba(232,130,154,.22);
+  cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:16px;
+  transition:transform .2s,box-shadow .2s;backdrop-filter:blur(8px);
+}
+.app-card:active{transform:scale(.97);}
+.app-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(180,60,90,.2);}
+.card-icon{
+  width:54px;height:54px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+}
+.card-icon.pink{background:linear-gradient(135deg,#e8829a,#b85470);}
+.card-icon.dark{background:linear-gradient(135deg,#6b3a4a,#c9607a);}
+.card-text{text-align:left;}
+.card-name{font-family:'Playfair Display',serif;font-size:1.1rem;color:#2c1a22;margin-bottom:3px;}
+.card-desc{font-size:.74rem;color:#a07888;line-height:1.4;}
+
+.note{font-size:.68rem;color:#c9a0aa;margin-top:20px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="inner">
+  <span class="heart">💕</span>
+  <h1>Just <em>Us Two</em></h1>
+  <p>Our private little world.<br>Choose your side to open your app.</p>
+
+  <div class="cards">
+    <a class="app-card" href="simi-app.html">
+      <div class="card-icon pink">🌸</div>
+      <div class="card-text">
+        <div class="card-name">Simi's App</div>
+        <div class="card-desc">Share your mood, chat, play games &amp; more</div>
+      </div>
+    </a>
+    <a class="app-card" href="his-app.html">
+      <div class="card-icon dark">🌙</div>
+      <div class="card-text">
+        <div class="card-name">His App</div>
+        <div class="card-desc">See her heart, chat, play games &amp; more</div>
+      </div>
+    </a>
+  </div>
+
+  <p class="note">Both apps are PIN protected 🔒<br>Only you two know the way in.</p>
+</div>
+</body>
+</html>
